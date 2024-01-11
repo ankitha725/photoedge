@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edge Detection</title>
+</head>
+<body>
+  <input type="file" id="imageInput" accept="image/jpeg" />
+  <canvas id="outputCanvas" width="500" height="500"></canvas>
+
+  <script src="https://docs.opencv.org/master/opencv.js"></script>
+  <script>
+    document.getElementById('imageInput').addEventListener('change', handleImage);
+
+    function handleImage(event) {
+      const input = event.target;
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+          const img = new Image();
+          img.src = e.target.result;
+
+          img.onload = function () {
+            const canvas = document.getElementById('outputCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+
+            // Apply Canny edge detection
+            let src = cv.imread(canvas);
+            let dst = new cv.Mat();
+            cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+            cv.GaussianBlur(src, src, new cv.Size(3, 3), 0, 0, cv.BORDER_DEFAULT);
+            cv.Canny(src, dst, 50, 150, 3, false);
+            cv.imshow(canvas, dst);
+
+            src.delete();
+            dst.delete();
+          };
+        };
+
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+    
+  </script>
+</body>
+</html>
